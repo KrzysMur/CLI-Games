@@ -1,5 +1,5 @@
 import random
-import os
+import os, sys
 import time
 
 class Board(object):
@@ -9,6 +9,7 @@ class Board(object):
 
     def generate_random(self):
         self.board = [[random.randint(0, 1) for _ in range(5)] for _ in range(5)]
+        #self.board = [[1, 0, 0, 0, 0]]*5
         for row in self.board: self.mines += row.count(1)
 
     def count_neighbouring_ones(self, square):
@@ -48,12 +49,11 @@ class UserBoard(Board):
             self.usr_board[square[0]] = self.usr_board[square[0]][:square[1]*2] + str(neighbours) + self.usr_board[square[0]][square[1]*2+1:]
             return True
         else:
-            print("YOU DIED...")
-            return False
+            game_lost()
 
     def mark_square(self, square):
         if self.marked < self.mines:
-            self.marked += 1
+            if self.usr_board[square[0]][square[1]*2] != "X": self.marked += 1
             self.usr_board[square[0]] = self.usr_board[square[0]][:square[1]*2] + "X" + self.usr_board[square[0]][square[1]*2+1:]
         else: print("No more marks left...")
 
@@ -76,6 +76,7 @@ class InputParser:
 def main():
     board = Board()
     board.generate_random()
+
     usr_board = UserBoard(board)
     input_parser = InputParser()
     print(f"Mines on the board: {board.mines}")
@@ -84,15 +85,27 @@ def main():
     running = True
 
     while running:
-        #os.system("cls")
+        os.system("cls")
         usr_board.show()
         input_parser.get_input()
         input_parser.parse_square()
         square = input_parser.parsed
-        if not square[2]: running = usr_board.uncover_square(square)
-        else: usr_board.mark_square(square)
+        try:
+            if not square[2]: running = usr_board.uncover_square(square)
+            else: usr_board.mark_square(square)
+        except IndexError: print("This square is not on the board"); time.sleep(.5)
+
+        running = check_if_win(usr_board.usr_board)
 
 
+def check_if_win(usr_board):
+    for row in usr_board:
+        if "#" in row: return True
+    print("YOU WIN!!!"); sys.exit()
+
+def game_lost():
+    print("YOU LOSE!!!")
+    sys.exit()
 
 
 if __name__=="__main__":
