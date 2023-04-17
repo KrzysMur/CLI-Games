@@ -3,13 +3,15 @@ import os, sys
 import time
 
 class Board(object):
-    def __init__(self):
+    def __init__(self, size):
         self.board = None
         self.mines = 0
+        self.size = size
 
-    def generate_random(self):
-        self.board = [[random.randint(0, 1) for _ in range(5)] for _ in range(5)]
-        #self.board = [[1, 0, 0, 0, 0]]*5
+    def generate_random(self, btm_ratio):
+        nums = [1]
+        for _ in range(btm_ratio): nums.append(0)
+        self.board = [[random.choice(nums) for _ in range(self.size)] for _ in range(self.size)]
         for row in self.board: self.mines += row.count(1)
 
     def count_neighbouring_ones(self, square):
@@ -31,15 +33,15 @@ class Board(object):
 
 class UserBoard(Board):
 
-    def __init__(self, board):
-        super().__init__()
+    def __init__(self, board, size):
+        super().__init__(size)
         self.board = board.board
         self.mines = board.mines
-        self.usr_board = ["# # # # #"] * 5
+        self.usr_board = ["# " * self.size] * self.size
         self.marked = 0
 
     def show(self):
-        print("   A B C D E        marks left:", self.mines - self.marked)
+        print("   A B C D E F G H I J "[:3+2*self.size], "     marks left:", self.mines - self.marked)
         for i, row in enumerate(self.usr_board): print(f"{i+1}  {row}")
 
     def uncover_square(self, square):
@@ -74,18 +76,20 @@ class InputParser:
 
 
 def main():
-    board = Board()
-    board.generate_random()
 
-    usr_board = UserBoard(board)
+    size = 7
+    blank_per_one_mine = 3
+
+    board = Board(size=size)
+    board.generate_random(blank_per_one_mine)
+
+    usr_board = UserBoard(board=board, size=size)
     input_parser = InputParser()
-    print(f"Mines on the board: {board.mines}")
-    time.sleep(1)
 
     running = True
 
     while running:
-        os.system("cls")
+       # os.system("cls")
         usr_board.show()
         input_parser.get_input()
         input_parser.parse_square()
