@@ -3,7 +3,7 @@ import os
 
 class Board:
     def __init__(self):
-        self.y_offset = 4
+        self.height = 5
         self.car_offset = 40
         self.ground_length = 50
 
@@ -14,7 +14,9 @@ class Car(Board):
         self.symbol = "o-=O"
 
     def show(self):
+        for _ in range(self.height - self.elevation - 1): print()
         print(" "*self.car_offset + self.symbol)
+        for _ in range(self.elevation): print()
     
 
 
@@ -32,8 +34,11 @@ class Ground(Board):
         print(ground)
 
 
+def show_board(car, ground):
+    car.show()
+    ground.show()
 
-
+    
 def main():
     car = Car()
     ground = Ground()
