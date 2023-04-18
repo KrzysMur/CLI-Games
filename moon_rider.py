@@ -1,12 +1,18 @@
 import os
 import time
 import random
+from pynput import keyboard
 
 class Board:
     def __init__(self):
         self.height = 5
         self.car_offset = 40
         self.ground_length = 50
+
+    @staticmethod
+    def show(car, ground):
+        car.show()
+        ground.show()
 
 
 
@@ -39,33 +45,49 @@ class Ground(Board):
     def add_hole(self):
         self.holes.append(0)
 
+    def move_holes(self):
+        self.holes = [h+1 for h in self.holes if h < self.ground_length]
 
+    def random_generate_hole(self):
+        try:
+            if self.holes[-1] > random.randint(10, 15) and random.randint(0, 5) == 0:
+                self.add_hole()
+        except IndexError:
+            if random.randint(0, 3): self.add_hole()
 
-def show_board(car, ground):
-    car.show()
-    ground.show()
-
-def clear(): 
-    os.system("cls")
-
-def move_holes(ground):
-    ground.holes = [h+1 for h in ground.holes if h < ground.ground_length]
 
 def main():
     car = Car()
     ground = Ground()
 
+    keyboard.Listener(on_press=on_press).start() 
+
     running = True
     while running:
         clear()
-        show_board(car, ground)
+        Board.show(car, ground)
 
-        if ground.holes[-1] > random.randint(10, 15) and random.randint(0, 5) == 0:
-            ground.add_hole()
+        ground.random_generate_hole()
+        ground.move_holes()
+        time.sleep(.05)
 
 
-        move_holes(ground)
-        time.sleep(.01)
+def on_press(key):
+    try:
+        if key.name == "space": jump()
+    except AttributeError: return False
+
+
+def jump():
+    print("skok")
+
+
+
+def clear(): 
+    os.system("cls")
+
+
+
 
 if __name__ == "__main__":
     main()
