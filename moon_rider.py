@@ -8,13 +8,13 @@ class Board:
         self.height = 5
         self.car_offset = 40
         self.ground_length = 50
-        self.refresh_delay = 0.05   
+        self.refresh_delay = 0.05
 
     @staticmethod
-    def show(car, ground):
+    def show(car, ground, points):
         car.show()
         ground.show()
-
+        print(f"         SCORE: {points}")
 
 
 class Car(Board):
@@ -32,11 +32,11 @@ class Car(Board):
         height = 2
         for _ in range(height):
             self.elevation += 1
-            time.sleep(self.refresh_delay*2)
+            time.sleep(self.refresh_delay*3)
         time.sleep(self.refresh_delay*8)
         for _ in range(height):
             self.elevation -= 1
-            time.sleep(self.refresh_delay*2)
+            time.sleep(self.refresh_delay*4)
 
 
 
@@ -65,6 +65,12 @@ class Ground(Board):
         except IndexError:
             if random.randint(0, 3): self.add_hole()
 
+    def check_if_loss(self, elev):
+        if self.car_offset + 1 in self.holes:
+            if elev == 0:
+                return 0
+            else:
+                return 1
 
 def main():
 
@@ -75,18 +81,26 @@ def main():
 
     car = Car()
     ground = Ground()
+    points = 0
 
     keyboard.Listener(on_press=on_press).start() 
 
     running = True
     while running:
         clear()
-        Board.show(car, ground)
+        Board.show(car, ground, points)
+
+        check = ground.check_if_loss(car.elevation)
+        if check == 0:
+            running = False
+        elif check == 1:
+            points += 1
 
         ground.random_generate_hole()
         ground.move_holes()     
         time.sleep(car.refresh_delay)
 
+    print(f"Final score: {points}")
 
 
 
